@@ -9,13 +9,12 @@ export const syncUser = mutation({
     clerkId: v.string(),
   },
   handler: async (ctx, args) => {
-    // Check if user already exists
-    const existing = await ctx.db
+    const existingUser = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .first();
+      .unique();
 
-    if (existing) return;
+    if (existingUser) return;
 
     await ctx.db.insert("users", {
       email: args.email,
