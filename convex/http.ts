@@ -1,27 +1,25 @@
-
-import { httpRouter, httpActionGeneric } from "convex/server";
-
+import { httpRouter } from "convex/server";
+import { WebhookEvent } from "@clerk/backend";
 import { Webhook } from "svix";
 import { api } from "./_generated/api";
-import type { WebhookEvent } from "@clerk/backend";
+import { httpAction } from "./_generated/server";
 
 const http = httpRouter();
 
 http.route({
   path: "/clerk-webhook",
   method: "POST",
-  handler: httpActionGeneric(async (ctx, request) => {
-
+  handler: httpAction(async (ctx, request) => {
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
     if (!webhookSecret) {
       throw new Error("Missing CLERK_WEBHOOK_SECRET environment variable");
     }
 
-    const svixId = request.headers.get("svix-id") ?? "";
-    const svixSignature = request.headers.get("svix-signature") ?? "";
-    const svixTimestamp = request.headers.get("svix-timestamp") ?? "";
+    const svix_id = request.headers.get("svix-id");
+    const svix_signature = request.headers.get("svix-signature");
+    const svix_timestamp = request.headers.get("svix-timestamp");
 
-    if (!svixId || !svixSignature || !svixTimestamp) {
+    if (!svix_id || !svix_signature || !svix_timestamp) {
       return new Response("Missing Svix headers", { status: 400 });
     }
 
@@ -31,18 +29,20 @@ http.route({
 
     try {
       evt = wh.verify(payload, {
-        "svix-id": svixId,
-        "svix-signature": svixSignature,
-        "svix-timestamp": svixTimestamp,
+        "svix-id": svix_id,
+        "svix-timestamp": svix_timestamp,
+        "svix-signature": svix_signature,
       }) as WebhookEvent;
     } catch (err) {
-      console.error("❌ Webhook verification failed:", err);
-      return new Response("Invalid webhook signature", { status: 400 });
+      console.error("Webhook verification failed:", err);
+      return new Response("Invalid signature", { status: 400 });
     }
 
-    if (evt.type === "user.created") {
+    const eventType = evt.type;
+
+    if (eventType === "user.created") {
       const { id, first_name, last_name, image_url, email_addresses } = evt.data;
-      const email = email_addresses?.[0]?.email_address ?? "";
+      const email = email_addresses[0]?.email_address ?? "";
       const name = `${first_name || ""} ${last_name || ""}`.trim();
 
       try {
@@ -53,12 +53,30 @@ http.route({
           clerkId: id,
         });
       } catch (error) {
-        console.error("❌ Error syncing user:", error);
-        return new Response("Error syncing user", { status: 500 });
+        console.error("Error creating user:", error);
+        return new Response("Error creating user", { status: 500 });
       }
     }
 
-    return new Response("✅ Webhook processed successfully", { status: 200 });
+    if (eventType === "user.updated") {
+      const { id, first_name, last_name, image_url, email_addresses } = evt.data;
+      const email = email_addresses[0]?.email_address ?? "";
+      const name = `${first_name || ""} ${last_name || ""}`.trim();
+
+      try {
+        await ctx.runMutation(api.users.updateUser, {
+          email,
+          name,
+          image: image_url,
+          clerkId: id,
+        });
+      } catch (error) {
+        console.error("Error updating user:", error);
+        return new Response("Error updating user", { status: 500 });
+      }
+    }
+
+    return new Response("Webhook processed successfully", { status: 200 });
   }),
 });
 
