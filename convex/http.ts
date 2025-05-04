@@ -7,7 +7,8 @@ import { httpAction } from "./_generated/server";
 const http = httpRouter();
 
 http.route({
-  path: "/clerk-webhook",
+  path: "/clerk-webhook",  // ✅ THIS IS THE ONLY VALID ROUTE
+
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
@@ -67,21 +68,20 @@ http.route({
         }
 
         if (eventType === "user.created") {
-          await ctx.runMutation(api.users.syncUser, {
+          await ctx.runMutation(api.users.syncUser, { // Correctly reference the syncUser mutation
             email,
             name,
             image: image_url,
             clerkId: id,
           });
         } else if (eventType === "user.updated") {
-          await ctx.runMutation(api.users.updateUser, {
+          await ctx.runMutation(api.users.updateUser, { // Correctly reference the updateUser mutation
             email,
             name,
             image: image_url,
             clerkId: id,
           });
         }
-
         return new Response("Webhook processed", { status: 200 });
       } else {
         console.error("Invalid user data:", JSON.stringify(userData, null, 2));
