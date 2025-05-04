@@ -1,7 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-// Create user if not exists
+// Sync user mutation, to insert a new user if they don't exist
 export const syncUser = mutation({
   args: {
     email: v.string(),
@@ -16,6 +16,7 @@ export const syncUser = mutation({
       .unique();
 
     if (!existingUser) {
+      // If no user is found, insert a new one
       await ctx.db.insert("users", {
         email: args.email,
         name: args.name,
@@ -26,7 +27,7 @@ export const syncUser = mutation({
   },
 });
 
-// Update user info
+// Update user mutation, to modify an existing user's details
 export const updateUser = mutation({
   args: {
     email: v.string(),
@@ -41,7 +42,14 @@ export const updateUser = mutation({
       .unique();
 
     if (!user) {
-      throw new Error("User not found");
+      // Fallback: create user if not found (same as syncUser logic)
+      await ctx.db.insert("users", {
+        email: args.email,
+        name: args.name,
+        image: args.image,
+        clerkId: args.clerkId,
+      });
+      return;
     }
 
     await ctx.db.patch(user._id, {

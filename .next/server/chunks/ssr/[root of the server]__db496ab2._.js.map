@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 15, "column": 0}, "map": {"version":3,"sources":["file://D%3A/ai-fitness/src/providers/ConvexClerkProvider.tsx"],"sourcesContent":["\"use client\"\r\n\r\nimport { ClerkProvider, useAuth } from \"@clerk/clerk-react\";\r\nimport { ConvexProviderWithClerk } from \"convex/react-clerk\";\r\nimport { ConvexReactClient } from \"convex/react\";\r\n\r\n\r\nconst convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)\r\n\r\nfunction ConvexClerkProvider({children}: {children: React.ReactNode}) {\r\n    return (\r\n        <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}>\r\n            <ConvexProviderWithClerk client={convex} useAuth={useAuth}>\r\n                {children}\r\n            </ConvexProviderWithClerk>\r\n\r\n        </ClerkProvider>\r\n    )\r\n}\r\n\r\nexport default ConvexClerkProvider"],"names":[],"mappings":";;;;AAEA;AAAA;AAAA;AACA;AAAA;AACA;AAAA;AAJA;;;;;AAOA,MAAM,SAAS,IAAI,wJAAA,CAAA,oBAAiB;AAEpC,SAAS,oBAAoB,EAAC,QAAQ,EAA8B;IAChE,qBACI,8OAAC,2KAAA,CAAA,gBAAa;QAAC,cAAc;kBACzB,cAAA,8OAAC,kLAAA,CAAA,0BAAuB;YAAC,QAAQ;YAAQ,SAAS,uLAAA,CAAA,UAAO;sBACpD;;;;;;;;;;;AAKjB;uCAEe","debugId":null}}]
+}

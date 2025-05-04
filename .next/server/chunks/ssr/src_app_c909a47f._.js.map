@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 19, "column": 0}, "map": {"version":3,"sources":["file://D%3A/ai-fitness/src/app/page.tsx"],"sourcesContent":["\nimport { SignedIn, SignedOut, SignIn, SignInButton, SignOutButton } from \"@clerk/nextjs\"\n\nconst HomePage = () => {\n  return (\n    <div>\n\n      HomePage\n    <SignedOut>\n      \n      <SignInButton />\n    </SignedOut>\n\n   <SignedIn>\n    <SignOutButton />\n   </SignedIn>\n    </div>\n  )\n}\n\nexport default HomePage\n"],"names":[],"mappings":";;;;AACA;AAAA;;;AAEA,MAAM,WAAW;IACf,qBACE,8OAAC;;YAAI;0BAGL,8OAAC,yKAAA,CAAA,YAAS;0BAER,cAAA,8OAAC,sLAAA,CAAA,eAAY;;;;;;;;;;0BAGhB,8OAAC,yKAAA,CAAA,WAAQ;0BACR,cAAA,8OAAC,sLAAA,CAAA,gBAAa;;;;;;;;;;;;;;;;AAIlB;uCAEe","debugId":null}}]
+}
